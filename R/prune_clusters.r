@@ -8,19 +8,26 @@ prune_clusters <- function(X,Zck,r,S,BIC_penalty){
     alt_log_Pr_ck_matrix = log_Pr_ck_matrix
     alt_log_Pr_ck_matrix[Zck[,c],c] = -Inf
     Kck = get_best_clust_given_logPr_ck(alt_log_Pr_ck_matrix)>0
+    alt_log_Pr_ck_matrix = get_log_Pr_ck_matrix(cl,X,Kck,r,S) #< Regenerate the whole thing to account for BIC penalty
+    # Add the BIC penalty to alternative logPr
+    #altBIC_penalty = (S_length * log(apply(Kck,2,sum)))/2
+    #alt_log_Pr_ck_matrix = t(t(alt_log_Pr_ck_matrix)+altBIC_penalty)
 
     # For each cell in the cluster
-    for(cc in which(Zck[,c])){
-      curLogLik = log_Pr_ck_matrix[cc,Zck[cc,]]
-      altLogLik = log_Pr_ck_matrix[cc,Kck[cc,]]
-      diffLogLik = curLogLik - altLogLik
-    }
+    #for(cc in which(Zck[,c])){
+    #  curLogLik = log_Pr_ck_matrix[cc,Zck[cc,]]
+    #  altLogLik = log_Pr_ck_matrix[cc,Kck[cc,]]
+    #  diffLogLik = curLogLik - altLogLik
+    #}
 
     # Find current log likelihood
-    curLogLik = log_Pr_ck_matrix[which(Zck[,c])]
+    #curLogLik  = apply(log_Pr_ck_matrix[which(Zck[,c]),],1,max)
+    #curLogLik = log_Pr_ck_matrix[which(Zck[,c])]
+    curLogLik = log_Pr_ck_matrix[Zck[,c],c]
 
     # Find what log likelihood would be using the alternative clusters
-    altLogLik = log_Pr_ck_matrix[which(Zck[,c]),][which(Kck[which(Zck[,c]),])]
+    #altLogLik = apply(alt_log_Pr_ck_matrix[which(Zck[,c]),],1,max)
+    altLogLik  = alt_log_Pr_ck_matrix[which(Zck[,c]),][Kck[which(Zck[,c]),]]
 
     # Difference
     diffLogLik = sum((altLogLik-curLogLik))
@@ -30,11 +37,13 @@ prune_clusters <- function(X,Zck,r,S,BIC_penalty){
     # Is the loss of likelihood from merging smaller than the BIC penalty?
     #if(altLogLik>curLogLik){makeChange=TRUE
     if(diffLogLik>=0){makeChange=TRUE  #> Positive diff indidicate the change improves log likelihood... so always make that change
-    }else{
-      if(diffLogLik <= -BIC_penalty[c]){
-        makeChange=TRUE
-      }
-      makeChange=FALSE
+    }#else{makeChange=FALSE}
+    else{
+       if(diffLogLik < -BIC_penalty[c]){
+         makeChange=FALSE
+       }else{
+         makeChange=TRUE
+       }
     }
     #if(diffLogLik<BIC_penalty[c]){
     if(makeChange){
@@ -44,7 +53,8 @@ prune_clusters <- function(X,Zck,r,S,BIC_penalty){
       out$BIC_penalty = BIC_penalty[c]
       out$num_cells_changed = sum(Zck[,c])
       out$diffLogLik = diffLogLik
-      out$Zck = Kck[,setdiff(1:dim(Kck)[2],c)]
+      #out$Zck = Kck[,setdiff(1:dim(Kck)[2],c)]
+      out$Zck = Kck[,colSums(Kck)>0]
       return(out)
     }
   }

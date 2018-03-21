@@ -1,7 +1,6 @@
 library(parallel)
-## Use option cl.cores to choose an appropriate cluster size.
 no_cores <- detectCores()
-cl <- makeCluster(no_cores)
+cl <- makeCluster(no_cores-1)
 
 # Load dummy data
 library(EWCE)
