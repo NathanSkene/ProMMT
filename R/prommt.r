@@ -12,20 +12,27 @@ ProMTT <- function(X,cl){
     #}
 
     # EM steps
-    expOut = expectation_step(cl,X,Zck,r,S)
+    expOut = ProMMT::expectation_step(cl,X,Zck,r,S)
     dim(expOut$Zck)
-    dim(expOut$log_Pr_ck_matrix)
+    print(colSums(Zck))
     Zck = expOut$Zck
-    log_Pr_ck_matrix = expOut$log_Pr_ck_matrix
-    S   = maximisation_step(cl,X,Zck,r,S,S_length)
+    S   = ProMMT::maximisation_step(cl,X,Zck,r,S,S_length)
 
     # Calculate BIC penalty
     BIC_penalty = (S_length * log(apply(Zck,2,sum)))/2
 
-    prune_out = prune_clusters(Zck,log_Pr_ck_matrix,S,BIC_penalty)
+    #print(length(colSums(Zck)))
+    #print(colSums(Zck))
+    prune_out = ProMMT::prune_clusters(X,Zck,r,S,BIC_penalty)
+    #print(length(colSums(prune_out$Zck)))
+    #print(colSums(prune_out$Zck))
+
     if(prune_out$dropped!=-1){
+      Zck_old = Zck
       Zck = prune_out$Zck
       print(sprintf("------OUTPUT: penalty: %s, diff: %s",prune_out$BIC_penalty,prune_out$diffLogLik))
+      #print(dim(Zck))
+      #print(colSums(Zck))
     }
   }
 

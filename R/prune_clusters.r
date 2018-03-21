@@ -1,4 +1,7 @@
-prune_clusters <- function(Zck,log_Pr_ck_matrix,S,BIC_penalty){
+prune_clusters <- function(X,Zck,r,S,BIC_penalty){
+
+  log_Pr_ck_matrix = get_log_Pr_ck_matrix(cl,X,Zck,r,S)
+
   #for(c in 1:dim(Zck)[2]){
   for(c in sample(1:dim(Zck)[2],dim(Zck)[2])){
     # Find which clusters each cell would be assigned to if not the current one
@@ -26,9 +29,9 @@ prune_clusters <- function(Zck,log_Pr_ck_matrix,S,BIC_penalty){
 
     # Is the loss of likelihood from merging smaller than the BIC penalty?
     #if(altLogLik>curLogLik){makeChange=TRUE
-    if(diffLogLik>0){makeChange=TRUE  #> Positive diff indidicate the change improves log likelihood... so always make that change
+    if(diffLogLik>=0){makeChange=TRUE  #> Positive diff indidicate the change improves log likelihood... so always make that change
     }else{
-      if(diffLogLik < -BIC_penalty[c]){
+      if(diffLogLik <= -BIC_penalty[c]){
         makeChange=TRUE
       }
       makeChange=FALSE
