@@ -2,6 +2,7 @@ library(parallel)
 no_cores <- detectCores()
 cl <- makeCluster(no_cores-1)
 
+
 # Load dummy data
 library(EWCE)
 data("cortex_mrna")
@@ -18,4 +19,10 @@ up500=rownames(ttU[1:500,])
 down500=rownames(ttD[1:500,])
 keepGenes = c(up500,down500)
 exp = exp[keepGenes,]
+X=exp
 #res = promtt(exp,cl)
+
+S_length = 150 # How many genes shoul be permitted to have different means?
+S = sample(1:dim(X)[1],S_length) # Numerical index of genes whose means are permitted to vary
+r=2 # Value of r (for negative binomial parameter) is fixed
+Zck  = diag(dim(X)[2])>0 # Each cell is assigned to it's own class

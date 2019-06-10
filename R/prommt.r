@@ -1,10 +1,10 @@
+# Value of r (for negative binomial parameter) is fixed
+
 # Run the ProMTT algorithm
-ProMTT <- function(X,cl){
-  # Initial setup
-  S_length = 150 # How many genes shoul be permitted to have different means?
-  S = sample(1:dim(X)[1],S_length) # Numerical index of genes whose means are permitted to vary
-  r=2 # Value of r (for negative binomial parameter) is fixed
-  Zck  = diag(dim(X)[2])>0 # Each cell is assigned to it's own class
+ProMTT <- function(cl,X,S_length = 150,S=NULL,r=2,Zck=NULL){
+   # How many genes shoul be permitted to have different means?
+  if(is.null(S)){ S = sample(1:dim(X)[1],S_length) } # Numerical index of genes whose means are permitted to vary
+  if(is.null(Zck)){ Zck  = diag(dim(X)[2])>0 } # Each cell is assigned to it's own class
 
   noChange=0
   clusters = list()
@@ -15,8 +15,9 @@ ProMTT <- function(X,cl){
 
     # EM steps
     expOut = ProMMT::expectation_step(cl,X,Zck,r,S)
-    dim(expOut$Zck)
-    print(colSums(expOut$Zck))
+    if(dim(expOut$Zck[,1,drop=FALSE])[2]==1){break()} # If it reduces to single column then exit
+    #dim(expOut$Zck)
+    #print(colSums(expOut$Zck))
     Zck = expOut$Zck
     S_old = S
     S   = ProMMT::maximisation_step(cl,X,Zck,r,S,S_length)
@@ -27,6 +28,7 @@ ProMTT <- function(X,cl){
 
     # Prune
     prune_out = ProMMT::prune_clusters(X,Zck,r,S,BIC_penalty)
+    if(dim(prune_out$Zck[,1,drop=FALSE])[2]==1){break()} # If it reduces to single column then exit
 
     if(prune_out$dropped!=-1){
       Zck_old = Zck

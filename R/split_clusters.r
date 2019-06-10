@@ -1,4 +1,4 @@
-split_clusters <- function(X,Zck,r){
+split_clusters <- function(cl,X,S_length,Zck,r){
   # For each cluster
   for(clusterID in dim(Zck)[2]){
     # Get all cells in the cluster
@@ -12,5 +12,8 @@ split_clusters <- function(X,Zck,r){
     tenGenesWithBiggestChange = deltaYgt %>% .[!duplicated(.$g),] %>% .[1:10,]
     # - Find the ten genes giving top values of deltaYgt
     # For each of the top ten genes, split
+    inputGeneThresh = tenGenesWithBiggestChange[1,]
+    splitZck = data.frame(clust1=Xc[inputGeneThresh$g,]>=inputGeneThresh$t,clust2=Xc[inputGeneThresh$g,]<inputGeneThresh$t)
+    converged = ProMMT::ProMTT(cl=cl,X=X,S_length=S_length,r=r,Zck=splitZck)
   }
 }

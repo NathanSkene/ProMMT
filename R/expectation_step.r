@@ -7,7 +7,7 @@ expectation_step <- function(cl,X,Zck,r,S){
 
   # If a cluster now has no cells, then drop that cluster
   keepCols = !colSums(Zck_new)==0
-  Zck_new = Zck_new[,keepCols]
+  Zck_new = Zck_new[,keepCols,drop=FALSE]
 
   # Force Zck to be logical
   Zck_new = Zck_new>0

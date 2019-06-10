@@ -54,7 +54,7 @@ prune_clusters <- function(X,Zck,r,S,BIC_penalty){
       out$num_cells_changed = sum(Zck[,c])
       out$diffLogLik = diffLogLik
       #out$Zck = Kck[,setdiff(1:dim(Kck)[2],c)]
-      out$Zck = Kck[,colSums(Kck)>0]
+      out$Zck = Kck[,colSums(Kck)>0,drop=FALSE]
       return(out)
     }
   }
